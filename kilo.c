@@ -14,7 +14,11 @@
 void clearAndRepositionCursor();
 
 /*** data ***/
-struct termios original_termios;
+struct editorConfig
+{
+    struct termios original_termios;
+}
+struct editorConfig E;
 
 /*** terminal ***/
 void die(const char *s)
@@ -24,20 +28,20 @@ void die(const char *s)
     exit(1);
 }
 void disableRawMode(){
-    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios) == -1)
+    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.original_termios) == -1)
         die("tcsetattr");
 }
 
 void enableRawMode(){
 
     // Read terminal attributes into raw struct
-    if(tcgetattr(STDIN_FILENO, &original_termios) == -1)
+    if(tcgetattr(STDIN_FILENO, &E.original_termios) == -1)
         die("tcsetattr");
 
     // Called when program exits from main() or exit()
     atexit(disableRawMode);
 
-    struct termios raw = original_termios;
+    struct termios raw = E.original_termios;
 
     raw.c_lflag &= ~(ECHO | ICANON | ISIG);
 
