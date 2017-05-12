@@ -85,8 +85,18 @@ void clearAndRepositionCursor(){
     write(STDIN_FILENO, "\x1b[H", 3);
 }
 
+void editorDrawRows()
+{
+    for(int y = 0; y < 24 ; y++)
+    {
+        write(STDIN_FILENO, "~\r\n", 3);
+    }
+}
+
 void editorRefreshScreen(){
     clearAndRepositionCursor();    
+    editorDrawRows();
+    write(STDIN_FILENO, "\x1b[H", 3);
 }
 
 /*** init ***/
