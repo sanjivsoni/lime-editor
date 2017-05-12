@@ -10,12 +10,16 @@
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
+/*** function declarations ***/
+void clearAndRepositionCursor();
+
 /*** data ***/
 struct termios original_termios;
 
 /*** terminal ***/
 void die(const char *s)
 {
+    clearAndRepositionCursor();
     perror(s);
     exit(1);
 }
@@ -71,14 +75,18 @@ void editorProcessKeypress()
     {
         case CTRL_KEY('q'):
             exit(0);
+            clearAndRepositionCursor();
             break;
     }
 }
 /*** output ***/
-
-void editorRefreshScreen(){
+void clearAndRepositionCursor(){
     write(STDIN_FILENO, "\x1b[2J", 4);
     write(STDIN_FILENO, "\x1b[H", 3);
+}
+
+void editorRefreshScreen(){
+    clearAndRepositionCursor();    
 }
 
 /*** init ***/
