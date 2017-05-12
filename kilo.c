@@ -78,6 +78,7 @@ void editorProcessKeypress()
 
 void editorRefreshScreen(){
     write(STDIN_FILENO, "\x1b[2J", 4);
+    write(STDIN_FILENO, "\x1b[H", 3);
 }
 
 /*** init ***/
