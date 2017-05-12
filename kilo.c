@@ -3,17 +3,25 @@
 #include<unistd.h>
 #include<termios.h>
 #include<stdlib.h>
+#include<errno.h>
 
 struct termios original_termios;
 
+void die(const char *s)
+{
+    perror(s);
+    exit(1);
+}
 void disableRawMode(){
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios);
+    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_termios) == -1)
+        die("tcsetattr");
 }
 
 void enableRawMode(){
 
     // Read terminal attributes into raw struct
-    tcgetattr(STDIN_FILENO, &original_termios);
+    if(tcgetattr(STDIN_FILENO, &original_termios) == -1)
+        die("tcsetattr");
 
     // in stdlib.h
     // Called when program exits from main() or exit()
@@ -49,11 +57,12 @@ void enableRawMode(){
 
     // Minimum bytes to read before it returns
     raw.c_cc[VMIN] = 0;
-    raw.c_cc[VTIME
+    raw.c_cc[VTIME] = 1;
 
     // Write the new struct 
     // TCSAFLUSH - Clears any input left and not fed into shell
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
+        die("tcsetattr");
 }
 
 
@@ -61,9 +70,12 @@ void enableRawMode(){
 int main(){
     enableRawMode();
     char c;
-    // STDIN_FILENO define in unistd
-    // read() 1 byte from standard input stream
-    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q'){
+    while(1)
+    {
+        c = '\0';
+        // read() 1 byte from standard input stream
+        if(read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
+            die("read");
         // iscntrl() in ctype.h
         // iscntrl checks if  char is control char
         // ASCII 0-31 are control and 127 too.
@@ -75,6 +87,7 @@ int main(){
         } else { 
             printf("%d ('%c'\r)\n", c, c);
         }
+        if(c == 'q') break;
     }
 
 
