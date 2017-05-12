@@ -34,7 +34,7 @@ void enableRawMode(){
     atexit(disableRawMode);
 
     struct termios raw = original_termios;
-    
+
     raw.c_lflag &= ~(ECHO | ICANON | ISIG);
 
     raw.c_iflag &= ~(IXON | IEXTEN | ICRNL);
@@ -52,6 +52,7 @@ void enableRawMode(){
         die("tcsetattr");
 }
 
+/*** Input ***/
 char editorReadKey(){
     int nread;
     char c;
@@ -68,10 +69,15 @@ void editorProcessKeypress()
 
     switch(c)
     {
-        case CTRL_KEY('q');
-        exit(0);
-        break;
+        case CTRL_KEY('q'):
+            exit(0);
+            break;
     }
+}
+/*** output ***/
+
+void editorRefreshScreen(){
+    write(STDIN_FILENO, "\x1b[2J", 4);
 }
 
 /*** init ***/
@@ -80,6 +86,7 @@ int main(){
     enableRawMode();
     while(1)
     {
+        editorRefreshScreen();
         editorProcessKeypress();
     }
 
